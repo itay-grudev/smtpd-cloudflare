@@ -22,6 +22,7 @@ class MySmtpd < MidiSmtpServer::Smtpd
     if authentication_id == ENV.fetch('SMTP_USERNAME') && authentication == ENV.fetch('SMTP_PASSWORD')
       return authentication_id
     else
+      logger.debug("Attempted credentials: #{authentication_id}:#{authentication}")
       raise MidiSmtpServer::Smtpd535Exception
     end
   end
