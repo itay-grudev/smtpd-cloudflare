@@ -16,6 +16,27 @@ CLOUDFLARE_API = URI("https://api.cloudflare.com/client/v4/accounts/#{CLOUDFLARE
 raise "CLOUDFLARE_ACCOUNT_ID environment variable is empty" unless CLOUDFLARE_ACCOUNT_ID
 raise "CLOUDFLARE_API_TOKEN environment variable is empty" unless CLOUDFLARE_API_TOKEN
 
+def error_report_message(exception, backtrace)
+  return unless ENV['EXCEPTION_REPORTING_EMAIL']
+
+  payload = {
+    to: ENV['EXCEPTION_REPORTING_EMAIL'],
+    from: ENV['EXCEPTION_REPORTING_EMAIL'],
+    subject: "SMTPD Exception Report: #{exception.message}",
+    text: <<~HEREDOC
+      #{exception.message}
+
+      #{backtrace.join("\n")}
+    HEREDOC
+  }
+
+  request = Net::HTTP::Post.new(CLOUDFLARE_API, 'Authorization' => "Bearer #{CLOUDFLARE_API_TOKEN}", 'Content-Type' => 'application/json')
+  request.body = payload.to_json
+  response = Net::HTTP.start(CLOUDFLARE_API.hostname, CLOUDFLARE_API.port, use_ssl: true) do |http|
+    http.request(request)
+  end
+end
+
 class MySmtpd < MidiSmtpServer::Smtpd
 
   def on_auth_event(ctx, authorization_id, authentication_id, authentication)
@@ -112,6 +133,7 @@ class MySmtpd < MidiSmtpServer::Smtpd
         raise "Failed to dispatch message to Cloudflare: #{response.code} #{response.message} - #{response.body}"
       end
     rescue => e
+      error_report_message(e, e.backtrace)
       raise "Failed to dispatch message to Cloudflare: #{e.message}"
     end
   end
@@ -120,7 +142,7 @@ end
 
 
 server = MySmtpd.new(
-  ports: '25',
+  ports: ENV.fetch('PORT', 25),
   hosts: '0.0.0.0',
   auth_mode: :AUTH_REQUIRED,
 
