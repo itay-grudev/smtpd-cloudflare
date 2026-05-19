@@ -1,6 +1,7 @@
 require 'byebug'
 require 'dotenv/load'
 
+STDOUT.sync = true
 
 require 'json'
 require 'mail'
