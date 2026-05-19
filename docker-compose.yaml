@@ -1,0 +1,17 @@
+services:
+  smtpd-cloudflare:
+    container_name: smtpd-cloudflare
+    build: ./
+    ports:
+      - "25:2525"
+      - "587:2525"
+    labels:
+#      - "traefik.enable=true"
+      - "traefik.tcp.routers.smtpd.entrypoints=smtpsecure"
+      - "traefik.tcp.routers.smtpd.rule=HostSNI(`*`)"
+      - "traefik.tcp.routers.smtpd.tls=true"
+      - "traefik.tcp.routers.smtpd.tls.passthrough=true"
+      - "traefik.tcp.routers.smtpd.tls.certresolver=letsencrypt"
+      - "traefik.tcp.routers.smtpd.tls.domains[0].main=local.grudev.com"
+    stdin_open: true
+    tty: true
