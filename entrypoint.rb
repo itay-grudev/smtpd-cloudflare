@@ -57,26 +57,12 @@ class MySmtpd < MidiSmtpServer::Smtpd
       }
 
       if mail.multipart?
-        byebug
-  
-        # Add text and HTML parts if they exist
-        mail.text_part do |text_part|
-          if mail.text?
-            payload[:text] = text_part.body.to_s
-          end
-        end
-  
-        mail.html_part do |html_part|
-          if mail.html_part
-            payload[:html] = html_part.body.to_s
-          end
-        end
-      else
-        if mail.main_type == 'text'
-          if mail.sub_type == 'plain'
-            payload[:text] = mail.body.to_s
-          elsif mail.sub_type == 'html'
-            payload[:html] = mail.body.to_s
+        mail.parts.each do |part|
+          case part.sub_type
+          when 'plain'
+            payload[:text] = part.body.to_s
+          when 'html'
+            payload[:html] = part.body.to_s
           end
         end
       end
@@ -98,17 +84,17 @@ class MySmtpd < MidiSmtpServer::Smtpd
       if mail.attachments.any?
         payload[:attachments] = mail.attachments.map do |attachment|
           {
+            content: Base64.strict_encode64(attachment.body.decoded),
+            disposition: "attachment",
             filename: attachment.filename,
-            content_type: attachment.content_type,
-            content: Base64.strict_encode64(attachment.body.decoded)
+            type: attachment.content_type.split(";").first,
           }
         end
       end
 
-      p mail
-      
-      raise "Email must have at least a text or HTML part" unless payload[:text] || payload[:html]
-      
+      unless payload[:text] || payload[:html]
+        payload[:text] = ' '
+      end
       
       # Make the request
       request = Net::HTTP::Post.new(CLOUDFLARE_API, 'Authorization' => "Bearer #{CLOUDFLARE_API_TOKEN}", 'Content-Type' => 'application/json')
@@ -134,10 +120,11 @@ end
 
 
 server = MySmtpd.new(
-  ports: '2525',
+  ports: '25',
   hosts: '0.0.0.0',
   auth_mode: :AUTH_REQUIRED,
 
+  tls_mode: :TLS_OPTIONAL,
   # tls_mode: :TLS_REQUIRED,
   # tls_ciphers: TLS_CIPHERS_ADVANCED_PLUS,
   # tls_methods: TLS_METHODS_ADVANCED,
