@@ -9,12 +9,14 @@ require 'net/http'
 require 'midi-smtp-server'
 require 'midi-smtp-server/exceptions'
 
+require_relative 'tls'
+
 CLOUDFLARE_ACCOUNT_ID = ENV.fetch('CLOUDFLARE_ACCOUNT_ID')
-CLOUDFLARE_API_TOKEN = ENV.fetch('CLOUDFLARE_API_TOKEN')
+CLOUDFLARE_API_EMAIL_TOKEN = ENV.fetch('CLOUDFLARE_API_EMAIL_TOKEN')
 CLOUDFLARE_API = URI("https://api.cloudflare.com/client/v4/accounts/#{CLOUDFLARE_ACCOUNT_ID}/email/sending/send")
 
 raise "CLOUDFLARE_ACCOUNT_ID environment variable is empty" unless CLOUDFLARE_ACCOUNT_ID
-raise "CLOUDFLARE_API_TOKEN environment variable is empty" unless CLOUDFLARE_API_TOKEN
+raise "CLOUDFLARE_API_EMAIL_TOKEN environment variable is empty" unless CLOUDFLARE_API_EMAIL_TOKEN
 
 def error_report_message(exception, backtrace)
   return unless ENV['EXCEPTION_REPORTING_EMAIL']
@@ -30,11 +32,18 @@ def error_report_message(exception, backtrace)
     HEREDOC
   }
 
-  request = Net::HTTP::Post.new(CLOUDFLARE_API, 'Authorization' => "Bearer #{CLOUDFLARE_API_TOKEN}", 'Content-Type' => 'application/json')
+  request = Net::HTTP::Post.new(CLOUDFLARE_API, 'Authorization' => "Bearer #{CLOUDFLARE_API_EMAIL_TOKEN}", 'Content-Type' => 'application/json')
   request.body = payload.to_json
   response = Net::HTTP.start(CLOUDFLARE_API.hostname, CLOUDFLARE_API.port, use_ssl: true) do |http|
     http.request(request)
   end
+end
+
+begin
+  TLSAcme.new
+rescue => e
+  # error_report_message(e, e.backtrace)
+  raise "Failed to initialize TLSAcme: #{e.message}"
 end
 
 class MySmtpd < MidiSmtpServer::Smtpd
@@ -118,7 +127,7 @@ class MySmtpd < MidiSmtpServer::Smtpd
       end
       
       # Make the request
-      request = Net::HTTP::Post.new(CLOUDFLARE_API, 'Authorization' => "Bearer #{CLOUDFLARE_API_TOKEN}", 'Content-Type' => 'application/json')
+      request = Net::HTTP::Post.new(CLOUDFLARE_API, 'Authorization' => "Bearer #{CLOUDFLARE_API_EMAIL_TOKEN}", 'Content-Type' => 'application/json')
       request.body = payload.to_json
       puts JSON.pretty_generate(payload)
 
@@ -146,10 +155,11 @@ server = MySmtpd.new(
   hosts: '0.0.0.0',
   auth_mode: :AUTH_REQUIRED,
 
-  tls_mode: :TLS_OPTIONAL,
-  # tls_mode: :TLS_REQUIRED,
-  # tls_ciphers: TLS_CIPHERS_ADVANCED_PLUS,
-  # tls_methods: TLS_METHODS_ADVANCED,
+  tls_mode: :TLS_REQUIRED,
+  tls_ciphers: MidiSmtpServer::TLS_CIPHERS_ADVANCED_PLUS,
+  tls_methods: MidiSmtpServer::TLS_METHODS_ADVANCED,
+  tls_cert_path: TLSAcme::CERTIFICATE_PEM,
+  tls_key_path: TLSAcme::PRIVATE_KEY_PEM,
 )
 
 flag_status_ctrl_c_pressed = false

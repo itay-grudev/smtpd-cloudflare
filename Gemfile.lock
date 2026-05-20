@@ -1,12 +1,25 @@
 GEM
   remote: https://rubygems.org/
   specs:
+    acme-client (2.0.31)
+      base64 (~> 0.2)
+      faraday (>= 1.0, < 3.0.0)
+      faraday-retry (>= 1.0, < 3.0.0)
     base64 (0.3.0)
     byebug (13.0.0)
       reline (>= 0.6.0)
     date (3.5.1)
     dotenv (3.2.0)
+    faraday (2.14.2)
+      faraday-net_http (>= 2.0, < 3.5)
+      json
+      logger
+    faraday-net_http (3.4.2)
+      net-http (~> 0.5)
+    faraday-retry (2.4.0)
+      faraday (~> 2.0)
     io-console (0.8.2)
+    json (2.19.5)
     logger (1.7.0)
     mail (2.9.0)
       logger
@@ -16,6 +29,8 @@ GEM
       net-smtp
     midi-smtp-server (3.1.2)
     mini_mime (1.1.5)
+    net-http (0.9.1)
+      uri (>= 0.11.1)
     net-imap (0.6.4)
       date
       net-protocol
@@ -30,12 +45,14 @@ GEM
     reline (0.6.3)
       io-console (~> 0.5)
     timeout (0.6.1)
+    uri (1.1.1)
 
 PLATFORMS
   ruby
   x86_64-linux
 
 DEPENDENCIES
+  acme-client (~> 2.0)
   base64 (~> 0.3.0)
   byebug (~> 13.0)
   dotenv

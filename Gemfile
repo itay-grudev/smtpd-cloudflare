@@ -15,3 +15,5 @@ gem "mail", "~> 2.9"
 gem "ostruct", "~> 0.6.3"
 
 gem "byebug", "~> 13.0", group: :development
+
+gem "acme-client", "~> 2.0"
