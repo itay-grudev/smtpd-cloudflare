@@ -38,6 +38,7 @@ A great way to test it is with the `swaks` utility:
 
 ```
 swaks --to user@example.com --from user@example.com  --server 127.0.0.1:2525 --auth-user asd --auth-password asd --body "Hello world" 
+```
 
 License
 =======
