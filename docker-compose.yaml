@@ -5,6 +5,8 @@ services:
     ports:
       - "25:2525"
       - "587:2525"
+    volumes:
+      - smtpd-cloudflare-acme:/usr/src/app/acme
     labels:
 #      - "traefik.enable=true"
       - "traefik.tcp.routers.smtpd.entrypoints=smtpsecure"
@@ -15,3 +17,7 @@ services:
       - "traefik.tcp.routers.smtpd.tls.domains[0].main=local.grudev.com"
     stdin_open: true
     tty: true
+
+volumes:
+  smtpd-cloudflare-acme:
+    name: smtpd-cloudflare-acme
