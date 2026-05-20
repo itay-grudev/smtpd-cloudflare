@@ -7,6 +7,7 @@ services:
     volumes:
       - smtpd-cloudflare-acme:/usr/src/app/acme
     environment:
+      - "HOST=0.0.0.0"
       - "PORT=2525"
       - "SMTP_USERNAME=asd"
       - "SMTP_PASSWORD=asd"

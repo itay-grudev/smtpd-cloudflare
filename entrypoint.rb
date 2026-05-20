@@ -129,7 +129,6 @@ class MySmtpd < MidiSmtpServer::Smtpd
       # Make the request
       request = Net::HTTP::Post.new(CLOUDFLARE_API, 'Authorization' => "Bearer #{CLOUDFLARE_API_EMAIL_TOKEN}", 'Content-Type' => 'application/json')
       request.body = payload.to_json
-      puts JSON.pretty_generate(payload)
 
       response = Net::HTTP.start(CLOUDFLARE_API.hostname, CLOUDFLARE_API.port, use_ssl: true) do |http|
         http.request(request)
@@ -151,10 +150,9 @@ end
 
 
 server = MySmtpd.new(
-  ports: ENV.fetch('PORT', 25),
-  hosts: '0.0.0.0',
+  ports: ENV.fetch('PORT', 2525),
+  hosts: ENV.fetch('HOST', '0.0.0.0'),
   auth_mode: :AUTH_REQUIRED,
-
   tls_mode: :TLS_REQUIRED,
   tls_ciphers: MidiSmtpServer::TLS_CIPHERS_ADVANCED_PLUS,
   tls_methods: MidiSmtpServer::TLS_METHODS_ADVANCED,

@@ -64,8 +64,6 @@ class TLSAcme
 
     request = Net::HTTP::Post.new( CLOUDFLARE_DNS_API, 'Authorization' => "Bearer #{CLOUDFLARE_API_DNS_TOKEN}", 'Content-Type' => 'application/json' )
     request.body = payload.to_json
-    puts CLOUDFLARE_DNS_API
-    puts JSON.pretty_generate(payload)
     response = Net::HTTP.start( CLOUDFLARE_DNS_API.hostname, CLOUDFLARE_DNS_API.port, use_ssl: true ) do |http|
       http.request(request)
     end
