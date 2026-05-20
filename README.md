@@ -24,10 +24,20 @@ I run it as a Docker container which only needs a couple of configuration variab
 * `CLOUDFLARE_API_DNS_TOKEN` - A Cloudflare token with permissions to add and remove DNS records (for the ACME challenge)
 * `EXCEPTION_REPORTING_EMAIL` - An email address used for ACME and for logging any issues.
 * `DOMAIN` - The domain that you're requesting an TLS certificate for.
+* `HOST` - Address to listen on. Defaults to: `0.0.0.0`.
+* `PORT` - Port to listen on. Defaults to: `2525`.
 * `ACME_URL` - Set to the Let's Encrypt staging server while testing: `https://acme-staging-v02.api.letsencrypt.org/directory`, and their production server when ready: `https://acme-v02.api.letsencrypt.org/directory`.
 
 
 I hope it's useful to you too.
+
+Testing
+-------
+
+A great way to test it is with the `swaks` utility:
+
+```
+swaks --to user@example.com --from user@example.com  --server 127.0.0.1:2525 --auth-user asd --auth-password asd --body "Hello world" 
 
 License
 =======
