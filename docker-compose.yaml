@@ -8,6 +8,16 @@ services:
       - smtpd-cloudflare-acme:/usr/src/app/acme
     environment:
       - "PORT=2525"
+      - "SMTP_USERNAME=asd"
+      - "SMTP_PASSWORD=asd"
+      - "CLOUDFLARE_ACCOUNT_ID="
+      - "CLOUDFLARE_ZONE_ID="
+      - "CLOUDFLARE_API_EMAIL_TOKEN="
+      - "CLOUDFLARE_API_DNS_TOKEN="
+      - "RUBY_ENV=development"
+      - "EXCEPTION_REPORTING_EMAIL="
+      - "DOMAIN="
+      - "ACME_URL=https://acme-staging-v02.api.letsencrypt.org/directory"
 
 volumes:
   smtpd-cloudflare-acme:
