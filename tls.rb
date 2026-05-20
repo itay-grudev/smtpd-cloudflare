@@ -20,7 +20,7 @@ class TLSAcme
     @account_key = ensure_rsa_key( ACCOUNT_PRIVATE_KEY_PEM )
     @client = Acme::Client.new(
       private_key: @account_key,
-      directory: 'https://acme-staging-v02.api.letsencrypt.org/directory'
+      directory: ENV.fetch( 'ACME_URL', 'https://acme-v02.api.letsencrypt.org/directory' )
     )
 
     begin
