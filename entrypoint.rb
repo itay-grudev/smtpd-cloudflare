@@ -86,10 +86,12 @@ class MySmtpd < MidiSmtpServer::Smtpd
     ##
     # Build the payload for Cloudflare API
     begin
+      # Fix: sending a received header to Cloudflare causes an error, so we need to remove it before sending
+      mail.received = nil
       payload = {
         from: mail.from.first,
         recipients: mail.to,
-        mime_message: ctx[:message][:data]
+        mime_message: mail.to_s
       }
       
       # Make the request
@@ -113,7 +115,6 @@ class MySmtpd < MidiSmtpServer::Smtpd
   end
 
 end
-
 
 server = MySmtpd.new(
   ports: ENV.fetch('PORT', 2525),
