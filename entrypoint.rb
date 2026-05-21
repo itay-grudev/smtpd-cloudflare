@@ -18,17 +18,24 @@ CLOUDFLARE_API = URI("https://api.cloudflare.com/client/v4/accounts/#{CLOUDFLARE
 raise "CLOUDFLARE_ACCOUNT_ID environment variable is empty" unless CLOUDFLARE_ACCOUNT_ID
 raise "CLOUDFLARE_API_EMAIL_TOKEN environment variable is empty" unless CLOUDFLARE_API_EMAIL_TOKEN
 
-def error_report_message(exception, backtrace)
+def error_report_message(exception, message = nil)
   return unless ENV['EXCEPTION_REPORTING_EMAIL']
 
   payload = {
     to: ENV['EXCEPTION_REPORTING_EMAIL'],
     from: ENV['EXCEPTION_REPORTING_EMAIL'],
     subject: "SMTPD Exception Report: #{exception.message}",
-    text: <<~HEREDOC
-      #{exception.message}
+    html: <<~HEREDOC
+      
+      <b>#{exception.class}: #{exception.message}</b>
+      <pre style="white-space: pre-wrap; font-family: monospace;">
+      #{exception.backtrace.join("\n")}
+      </pre>
 
-      #{backtrace.join("\n")}
+      Original message:
+      <blockquote style="white-space: pre-wrap; font-family: monospace; border-left: 4px solid #ccc; padding-left: 10px; margin-left: 0;">
+      <pre style="white-space: pre-wrap; font-family: monospace;">#{message.to_s.strip}</pre>
+      </blockquote>
     HEREDOC
   }
 
@@ -42,8 +49,7 @@ end
 begin
   TLSAcme.new
 rescue => e
-  # error_report_message(e, e.backtrace)
-  raise "Failed to initialize TLSAcme: #{e.message}"
+  error_report_message e
 end
 
 class MySmtpd < MidiSmtpServer::Smtpd
@@ -137,7 +143,7 @@ class MySmtpd < MidiSmtpServer::Smtpd
         raise "Failed to dispatch message to Cloudflare: #{response.code} #{response.message} - #{response.body}"
       end
     rescue => e
-      error_report_message(e, e.backtrace)
+      error_report_message e, mail
       raise "Failed to dispatch message to Cloudflare: #{e.message}"
     end
   end
