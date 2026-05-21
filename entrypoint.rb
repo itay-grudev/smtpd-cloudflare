@@ -13,7 +13,7 @@ require_relative 'tls'
 
 CLOUDFLARE_ACCOUNT_ID = ENV.fetch('CLOUDFLARE_ACCOUNT_ID')
 CLOUDFLARE_API_EMAIL_TOKEN = ENV.fetch('CLOUDFLARE_API_EMAIL_TOKEN')
-CLOUDFLARE_API = URI("https://api.cloudflare.com/client/v4/accounts/#{CLOUDFLARE_ACCOUNT_ID}/email/sending/send")
+CLOUDFLARE_API = URI("https://api.cloudflare.com/client/v4/accounts/#{CLOUDFLARE_ACCOUNT_ID}/email/sending/send_raw")
 
 raise "CLOUDFLARE_ACCOUNT_ID environment variable is empty" unless CLOUDFLARE_ACCOUNT_ID
 raise "CLOUDFLARE_API_EMAIL_TOKEN environment variable is empty" unless CLOUDFLARE_API_EMAIL_TOKEN
