@@ -86,47 +86,10 @@ class MySmtpd < MidiSmtpServer::Smtpd
     # Build the payload for Cloudflare API
     begin
       payload = {
-        to: mail.to,
         from: mail.from.first,
-        subject: mail.subject,
-        headers: {}
+        receipients: mail.to,
+        mime_message: mail.to_s
       }
-
-      if mail.multipart?
-        mail.parts.each do |part|
-          case part.sub_type
-          when 'plain'
-            payload[:text] = part.body.to_s
-          when 'html'
-            payload[:html] = part.body.to_s
-          end
-        end
-      end
-
-      # Add CC and BCC if they exist
-      if mail.cc
-        payload[:cc] = mail.cc
-      end
-
-      if mail.bcc
-        payload[:bcc] = mail.bcc
-      end
-
-      if mail.reply_to
-        payload[:reply_to] = mail.reply_to
-      end
-
-      # Handle attachments
-      if mail.attachments.any?
-        payload[:attachments] = mail.attachments.map do |attachment|
-          {
-            content: Base64.strict_encode64(attachment.body.decoded),
-            disposition: "attachment",
-            filename: attachment.filename,
-            type: attachment.content_type.split(";").first,
-          }
-        end
-      end
       
       # Make the request
       request = Net::HTTP::Post.new(CLOUDFLARE_API, 'Authorization' => "Bearer #{CLOUDFLARE_API_EMAIL_TOKEN}", 'Content-Type' => 'application/json')
