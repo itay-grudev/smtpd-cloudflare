@@ -88,7 +88,7 @@ class MySmtpd < MidiSmtpServer::Smtpd
     begin
       payload = {
         from: mail.from.first,
-        receipients: mail.to,
+        recipients: mail.to,
         mime_message: ctx[:message][:data]
       }
       
