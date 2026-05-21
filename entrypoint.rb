@@ -13,7 +13,8 @@ require_relative 'tls'
 
 CLOUDFLARE_ACCOUNT_ID = ENV.fetch('CLOUDFLARE_ACCOUNT_ID')
 CLOUDFLARE_API_EMAIL_TOKEN = ENV.fetch('CLOUDFLARE_API_EMAIL_TOKEN')
-CLOUDFLARE_API = URI("https://api.cloudflare.com/client/v4/accounts/#{CLOUDFLARE_ACCOUNT_ID}/email/sending/send_raw")
+CLOUDFLARE_API = URI("https://api.cloudflare.com/client/v4/accounts/#{CLOUDFLARE_ACCOUNT_ID}/email/sending/send")
+CLOUDFLARE_RAW_API = URI("https://api.cloudflare.com/client/v4/accounts/#{CLOUDFLARE_ACCOUNT_ID}/email/sending/send_raw")
 
 raise "CLOUDFLARE_ACCOUNT_ID environment variable is empty" unless CLOUDFLARE_ACCOUNT_ID
 raise "CLOUDFLARE_API_EMAIL_TOKEN environment variable is empty" unless CLOUDFLARE_API_EMAIL_TOKEN
@@ -88,14 +89,14 @@ class MySmtpd < MidiSmtpServer::Smtpd
       payload = {
         from: mail.from.first,
         receipients: mail.to,
-        mime_message: mail.to_s
+        mime_message: ctx[:message][:data]
       }
       
       # Make the request
-      request = Net::HTTP::Post.new(CLOUDFLARE_API, 'Authorization' => "Bearer #{CLOUDFLARE_API_EMAIL_TOKEN}", 'Content-Type' => 'application/json')
+      request = Net::HTTP::Post.new(CLOUDFLARE_RAW_API, 'Authorization' => "Bearer #{CLOUDFLARE_API_EMAIL_TOKEN}", 'Content-Type' => 'application/json')
       request.body = payload.to_json
 
-      response = Net::HTTP.start(CLOUDFLARE_API.hostname, CLOUDFLARE_API.port, use_ssl: true) do |http|
+      response = Net::HTTP.start(CLOUDFLARE_RAW_API.hostname, CLOUDFLARE_RAW_API.port, use_ssl: true) do |http|
         http.request(request)
       end
       
