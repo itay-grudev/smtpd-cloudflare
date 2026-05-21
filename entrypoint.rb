@@ -121,10 +121,6 @@ class MySmtpd < MidiSmtpServer::Smtpd
           }
         end
       end
-
-      unless payload[:text] || payload[:html]
-        payload[:text] = ' '
-      end
       
       # Make the request
       request = Net::HTTP::Post.new(CLOUDFLARE_API, 'Authorization' => "Bearer #{CLOUDFLARE_API_EMAIL_TOKEN}", 'Content-Type' => 'application/json')
