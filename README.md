@@ -1,3 +1,7 @@
+> [!IMPORTANT]
+> Cloudflare now supports an SMTP endpoint for Email sending, rendering this project obsolete.  
+> See: https://developers.cloudflare.com/email-service/api/send-emails/smtp/
+
 # SMTPD Cloudflare
 
 I use a custom domain to send email from within Gmail. A while ago though, Google disabled the ability to send emails from a custom domain on the free Gmail version.
